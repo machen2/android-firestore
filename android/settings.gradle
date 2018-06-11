@@ -1,0 +1,3 @@
+rootProject.name = 'android_firestore_spike_2'
+
+include ':app'
