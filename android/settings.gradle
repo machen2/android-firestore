@@ -1,3 +1,5 @@
 rootProject.name = 'android_firestore_spike_2'
+include ':react-native-firebase'
+project(':react-native-firebase').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-firebase/android')
 
 include ':app'
