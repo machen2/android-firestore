@@ -4,55 +4,101 @@
  * @flow
  */
 
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
-  Platform,
-  StyleSheet,
-  Text,
-  View
+    StyleSheet,
+    Text,
+    View,
+    TextInput,
+    TouchableOpacity
 } from 'react-native';
+import firebase from 'react-native-firebase';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+export default class App extends Component {
+    constructor() {
+        super();
+        this.ref = firebase.firestore().collection('orders');
+        this.state = {
+            orderID: '',
+            token: ''
+        };
+    }
 
-type Props = {};
-export default class App extends Component<Props> {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
-        <Text style={styles.instructions}>
-          {instructions}
-        </Text>
-      </View>
-    );
-  }
+    updateOrderID(value) {
+        this.setState({
+            orderID: value
+        });
+    }
+
+    updateToken(value) {
+        this.setState({
+            token: value
+        });
+    }
+
+    addToOrders() {
+        this.ref.add({
+            orderID: this.state.orderID,
+            token: this.state.token,
+        });
+        this.setState({
+            orderID: '',
+            token: ''
+        });
+    }
+
+    getAllOrders() {
+        let allOrders = this.ref.get()
+            .then(snapshot => {
+                snapshot.forEach(doc => {
+                    console.log(doc.id, '=>', doc.data());
+                });
+            })
+            .catch(err => {
+                console.log('Error getting documents', err);
+            });
+    }
+
+    render() {
+        return (
+            <View style={styles.container}>
+                <TextInput style={styles.textInput}
+                           placeholder="orderID"
+                           value={this.state.orderID}
+                           onChangeText={(text) => this.updateOrderID(text)}/>
+                <TextInput style={styles.textInput}
+                           placeholder="token"
+                           value={this.state.token}
+                           onChangeText={(text) => this.updateToken(text)}/>
+                <TouchableOpacity onPress={() => this.addToOrders()}>
+                    <Text style={styles.button}>Store in FB</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => this.getAllOrders()}>
+                    <Text style={styles.button}>Get from FB</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
+        container: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#F5FCFF',
+        },
+        textInput: {
+            paddingTop: 1,
+            borderRadius: 4,
+            borderWidth: 0.5,
+            borderColor: '#00dd33',
+            minWidth: 100,
+        },
+        button: {
+            borderRadius: 4,
+            borderWidth: 0.5,
+            borderColor: '#dd0033'
+        }
+    }
+);
